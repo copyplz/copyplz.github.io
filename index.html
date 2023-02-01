@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    function copyToClipboard(textbox) {
+        textbox.select();
+        document.execCommand("copy");
+      }
+  </script>
+</head>
+<body>
+    <div>
+        <P><<h2>iterative server connection oriented</h2>
+  <textarea id="textbox1" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+int main()
+{
+  int sockfd,newsockfd,cli_len;
+  struct sockaddr_in serv_addr,cli_addr;
+  char a[50];
+  char a1[50];
+  sockfd = socket(AF_INET,SOCK_STREAM,0);
+  if(sockfd<0)
+  {
+  	printf("Socket failed");
+  	exit(0);
+  }
+  
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
+  serv_addr.sin_port = htons(3131);
+  if(bind(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr)) < 0)
+  {
+  printf("bind failed");
+  exit(1);
+  }
+  
+  if(listen(sockfd,5)<0)
+  {
+    printf("\n listen failed");
+    exit(0);
+  }
+  cli_len = sizeof(cli_addr);
+  printf("\n waiting for client");
+  newsockfd = accept(sockfd,(struct sockaddr*)&cli_addr, &cli_len);
+  read(newsockfd,a,50);
+  printf("\n Server Received : %s",a);
+  printf("Enter message");
+  write(newsockfd,a1,50);
+  close(newsockfd);
+}
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox1'))">Copy</button>
+    <br>
+  </div>
+<!------------------------------------------------------ -->
+  <div>
+        <P><<h2>iterative client connection oriented</h2>
+  <textarea id="textbox2" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+int main()
+{
+
+int sockfd;
+struct sockaddr_in serv_addr;
+char a[50],a1[50];
+
+sockfd = socket(AF_INET,SOCK_STREAM,0);
+if(sockfd < 0)
+{
+  printf("socket failed\n");
+  exit(0);
+}
+
+serv_addr.sin_family = AF_INET;
+serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
+serv_addr.sin_port = htons(3131);
+
+if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
+{
+  printf("Connection failed\n");
+  exit(0);
+}
+printf("Enter the message:\n");
+scanf("%s",a);
+write(sockfd,a,50);
+read(sockfd,a1,50);
+printf("Client Received the message %s",a1);
+close(sockfd);
+}
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox2'))">Copy</button>
+    <br>
+  </div>
+
+  <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>iterative server connection less</h2>
+  <textarea id="textbox3" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+int main()
+{
+  int sockfd,newsockfd,clilen;
+  struct sockaddr_in serv_addr,cli_addr;
+  char msg[50];
+  sockfd=socket(AF_INET,SOCK_DGRAM,0);
+  if(sockfd<0)
+  {
+    printf("\n Socket Failed");
+    exit(0);
+  }
+  serv_addr.sin_family=AF_INET;
+  serv_addr.sin_addr.s_addr=htonl(INADDR_ANY);
+  serv_addr.sin_port=htons(3100);
+  if(bind(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
+  {
+    printf("\n Bind Failed");
+    exit(0);
+  }
+  clilen=sizeof(cli_addr);
+  recvfrom(sockfd,msg,80,0,(struct sockaddr *)&cli_addr,&clilen);
+  printf("Server Received: %s",msg);
+  sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
+  close(sockfd);
+  
+}
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox3'))">Copy</button>
+    <br>
+  </div>
+
+<!------------------------------------------------------ -->
+  <div>
+        <P><<h2>iterative client connection less</h2>
+  <textarea id="textbox4" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<string.h>
+#include<sys/socket.h>
+int main()
+{
+        int sockfd,n,clilen,servlen;
+        struct sockaddr_in cli_addr,serv_addr;
+        char msg[50],msg1[50];
+        sockfd=socket(AF_INET,SOCK_DGRAM,0);
+        if(sockfd<0)
+        {
+         printf("\n Sokcet Failed");
+         exit(0);
+       }
+        serv_addr.sin_family=AF_INET;
+        serv_addr.sin_addr.s_addr=inet_addr("192.168.200.93");
+        serv_addr.sin_port=htons(3100);
+        cli_addr.sin_family=AF_INET;
+        cli_addr.sin_addr.s_addr=htonl(INADDR_ANY);
+        cli_addr.sin_port=htons(0);
+      if(connect(sockfd,(struct sockaddr*)&cli_addr,sizeof(cli_addr))<0)
+       {
+        printf("Client cant’t bind");
+        exit(1);
+       }
+       printf("Enter String");
+       fgets(msg,50,stdin);
+        if(sendto(sockfd,msg,50,0,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
+        {
+          printf("Client send to error");
+          exit(0);
+        }
+        servlen=sizeof(serv_addr);
+        n=recvfrom(sockfd,msg1,50,0,(struct sockaddr *)&serv_addr,&servlen);
+        if(n<0)
+        {
+                printf("Recv error");
+                exit(1);
+        }
+        else
+        {
+                printf("\n  Client received msg : %s",msg1);
+        }
+        close(sockfd);
+}
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox4'))">Copy</button>
+    <br>
+  </div>
+	
+ <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>concurrent server connection oriented</h2>
+  <textarea id="textbox5" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+ 
+int main()
+{
+  int sockfd,newsockfd,newsockfd1,clilen,pid,pid1;
+  struct sockaddr_in serv_addr,cli_addr;
+  char msg[50];
+  int count = 80;
+  sockfd = socket(AF_INET,SOCK_STREAM,0);
+  if(sockfd < 0)
+  {
+    printf("Socket failed\n");
+    exit(0);
+  }
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serv_addr.sin_port = htons(3100);
+  if(bind(sockfd,(struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0 )
+  {
+    printf("Bind failed\n");
+    exit(1);
+  }
+  if(listen(sockfd,5) < 0)
+  {
+    printf("Listen failed\n");
+    exit(1);
+  }
+  clilen = sizeof(cli_addr);
+  newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
+  pid = fork();
+  if( pid == 0)
+  {
+    close(sockfd);
+    printf("pid : %d Server ready\n",pid);
+    read(newsockfd,msg,50);
+    printf("Server received: %s\n",msg);
+    write(newsockfd,msg,50);
+  }
+  close(newsockfd);
+  newsockfd1 = accept(sockfd,(struct sockaddr*)&cli_addr, &clilen);
+  pid1 = fork();
+  if(pid1 == 0)
+  {
+    close(sockfd);
+    printf("pid1 : %d Server ready\n",pid1);
+    read(newsockfd1,msg,50);
+    printf("Server received : %s\n",msg);
+    write(newsockfd1,msg,50);
+  }
+  close(newsockfd1);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox5'))">Copy</button>
+    <br>
+  </div>
+	
+<!------------------------------------------------------ -->
+  <div>
+        <P><<h2>concurrent client connection oriented</h2>
+  <textarea id="textbox6" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+
+int main()
+{
+  int sockfd;
+  struct sockaddr_in serv_addr;
+  char msg[50],msg1[50];
+  sockfd = socket(AF_INET,SOCK_STREAM,0);
+  if(sockfd < 0)
+  {
+    printf("Socket failed\n");
+    exit(0);
+  }
+  
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
+  serv_addr.sin_port = htons(3100);
+   
+  if(connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+  {
+    printf("Connect failed\n");
+    exit(1);
+  }
+  
+  printf("Enter message\n");
+  scanf("%s",msg);
+  write(sockfd,msg,50);
+  read(sockfd,msg1,50);
+  printf("Client received : %s\n",msg1);
+  close(sockfd);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox6'))">Copy</button>
+    <br>
+  </div>
+	
+  <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>concurrent server connection less</h2>
+  <textarea id="textbox7" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+int main()
+{
+  int sockfd,newsockfd,clilen,pid,pid1,n,n1;
+  struct sockaddr_in serv_addr,cli_addr;
+  char msg[50];
+  int count = 80;
+  sockfd = socket(AF_INET,SOCK_DGRAM,0);
+  if(sockfd < 0)
+  {
+  printf("Socket failed\n");
+  exit(1);
+  }
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serv_addr.sin_port = htons(3204);
+  if(bind(sockfd,(struct sockaddr *) &serv_addr, sizeof(serv_addr))<0)
+  {
+    printf("bind failed\n");
+    exit(1);
+  }
+  clilen = sizeof(cli_addr);
+  n = recvfrom(sockfd,msg,80,0,(struct sockaddr *) &cli_addr, &clilen);
+  if(n<0)
+  {
+    printf("Frist client recv error\n");
+    exit(1);
+  }
+  pid = fork();
+  if(pid == 0)
+  {
+    printf("Server ready\n");
+    printf("server received the message: %s\n",msg);
+    sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
+  }
+  n1 = recvfrom(sockfd,msg,80,0,(struct sockaddr *)&cli_addr,&clilen);
+  if(n1<0)
+  {
+    printf("second client recv error\n");
+    exit(1);
+  }
+  pid1 = fork();
+  if(pid1 == 0)
+  {
+    printf("Server ready\n");
+    printf("server received the message: %s\n",msg);
+    sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
+  }
+  close(sockfd);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox7'))">Copy</button>
+    <br>
+  </div>
+	
+  <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>concurrent client connection less</h2>
+#include<stdio.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<string.h>
+int main()
+{
+        int sockfd,n,clilen,servlen;
+        struct sockaddr_in serv_addr,cli_addr;
+        char msg[50],msg1[50];
+        sockfd=socket(AF_INET,SOCK_DGRAM,0);
+        if(sockfd<0)
+        {
+        printf("\n Socket Failed");
+        exit(0);
+        }
+        serv_addr.sin_family=AF_INET;
+        serv_addr.sin_addr.s_addr=inet_addr("192.168.200.93");
+        serv_addr.sin_port=htons(3204);
+        cli_addr.sin_family=AF_INET;
+        cli_addr.sin_addr.s_addr=htonl(INADDR_ANY);
+        cli_addr.sin_port=htons(3000);
+        if(bind(sockfd,(struct sockaddr *)&cli_addr,sizeof(cli_addr))<0)
+        {
+           printf("\n Bind Failed");
+           exit(1);
+        }
+        printf("Enter String:");
+        fgets(msg,50,stdin);
+        if(sendto(sockfd,msg,80,0,(struct sockaddr*)&serv_addr,sizeof(serv_addr))< 0)
+        {
+         printf("Client send to error");
+         //exit(0);
+        }
+        servlen=sizeof(serv_addr);
+           n=recvfrom(sockfd,msg1,80,0,(struct sockaddr *)&serv_addr,&servlen);
+           if(n<0)
+           {
+            printf(" Recieve error");
+            exit(1);
+           }
+           else
+            {
+              printf("Client received msg:%s",msg1);    
+            }
+        close(sockfd);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox8'))">Copy</button>
+    <br>
+  </div>
+	
+    <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>time server</h2>
+  <textarea id="textbox9" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<time.h>
+int main()
+{
+  int sockfd,newsockfd,clilen;
+  struct sockaddr_in serv_addr,cli_addr;
+  char str[100],a[50];
+  time_t tick;
+  sockfd=socket(AF_INET,SOCK_STREAM,0);
+  if(sockfd<0)
+  {
+    printf("socket failed");
+    exit(0);
+  }
+  serv_addr.sin_family=AF_INET;
+  serv_addr.sin_addr.s_addr=inet_addr("192.168.200.155");
+  serv_addr.sin_port=htons(3100);
+  if(bind(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
+  {
+    printf("Bind failed");
+    exit(0);
+  }
+  if(listen(sockfd,5)<0)
+  {
+    printf("\n listen failed");
+    exit(0);
+  }
+  clilen=sizeof(cli_addr);
+  newsockfd=accept(sockfd,(struct sockaddr *)&cli_addr,&clilen);
+  tick=time(NULL);
+  snprintf(str,sizeof(str),"%s\n",ctime(&tick));
+  printf("%s",str);
+  read(newsockfd,a,50);
+  printf("\n%s",a);
+  write(newsockfd,str,100);
+  close(newsockfd);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox9'))">Copy</button>
+    <br>
+  </div>
+	
+  <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>time client</h2>
+  <textarea id="textbox10" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<stdlib.h>
+#include<string.h>
+#include<time.h>
+int main()
+{
+  int sockfd;
+  struct sockaddr_in serv_addr;
+  char a[50],a1[50];
+  ockfd=socket(AF_INET,SOCK_STREAM,0);
+  if(sockfd<0)
+  {
+    printf("socket failed");
+    exit(0);
+  }
+  serv_addr.sin_family=AF_INET;
+  serv_addr.sin_addr.s_addr=inet_addr("192.168.200.155");
+  serv_addr.sin_port=htons(3100);
+  if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
+  {
+    printf("connection failed");
+    exit(0);
+  }
+  write(sockfd,"Hello",50);
+  sleep(2);
+  read(sockfd,a,50);
+  printf("Client received message %s",a);
+  close(sockfd);
+} 
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox10'))">Copy</button>
+    <br>
+  </div>
+	
+   <!------------------------------------------------------ -->
+  <div>
+        <P><<h2>Dns</h2>
+  <textarea id="textbox11" rows="25" cols="100">
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<arpa/inet.h>
+int main()
+{
+  struct hostent *hst;
+  char name[20];
+  printf("Enter host name");
+  scanf("%s",name);
+  hst=gethostbyname(name);
+  if(hst==NULL)
+  {
+    printf("host not found");
+  }
+  printf("host name is :%s\n",hst->h_name);
+  printf("IP address is :%s\n",inet_ntoa(*((struct in_addr *) hst->h_addr)));
+}
+  </textarea>
+  <button onclick="copyToClipboard(document.getElementById('textbox11'))">Copy</button>
+    <br>
+  </div>
+</body>
+</html>
