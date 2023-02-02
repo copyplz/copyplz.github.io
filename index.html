@@ -10,92 +10,55 @@
 </head>
 <body>
     <div>
-        <P><<h2>iterative server connection oriented</h2>
+        <P><<h2>BFS</h2>
   <textarea id="textbox1" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-
-int main()
-{
-  int sockfd,newsockfd,cli_len;
-  struct sockaddr_in serv_addr,cli_addr;
-  char a[50];
-  char a1[50];
-  sockfd = socket(AF_INET,SOCK_STREAM,0);
-  if(sockfd<0)
-  {
-  	printf("Socket failed");
-  	exit(0);
-  }
-  
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
-  serv_addr.sin_port = htons(3131);
-  if(bind(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr)) < 0)
-  {
-  printf("bind failed");
-  exit(1);
-  }
-  
-  if(listen(sockfd,5)<0)
-  {
-    printf("\n listen failed");
-    exit(0);
-  }
-  cli_len = sizeof(cli_addr);
-  printf("\n waiting for client");
-  newsockfd = accept(sockfd,(struct sockaddr*)&cli_addr, &cli_len);
-  read(newsockfd,a,50);
-  printf("\n Server Received : %s",a);
-  printf("Enter message");
-  write(newsockfd,a1,50);
-  close(newsockfd);
+graph = {
+  '5' : ['3','7'],
+  '3' : ['2', '4','5'],
+  '7' : ['8'],
+  '2' : [],
+  '4' : ['8'],
+  '8' : []
 }
+visited = [] 
+queue = []
+def bfs(visited, graph, node): 
+  visited.append(node)
+  queue.append(node)
+  while queue:         
+    m = queue.pop(0) 
+    print (m,end=" ") 
+    for neighbour in graph[m]:
+      if neighbour not in visited:
+        visited.append(neighbour)
+        queue.append(neighbour)
+print("Following is the Breadth-First Search")
+bfs(visited, graph, '5')
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox1'))">Copy</button>
     <br>
   </div>
 <!------------------------------------------------------ -->
   <div>
-        <P><<h2>iterative client connection oriented</h2>
+        <P><<h2>DFS</h2>
   <textarea id="textbox2" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-
-int main()
-{
-
-int sockfd;
-struct sockaddr_in serv_addr;
-char a[50],a1[50];
-
-sockfd = socket(AF_INET,SOCK_STREAM,0);
-if(sockfd < 0)
-{
-  printf("socket failed\n");
-  exit(0);
+graph = {
+  '5' : ['3','7'],
+  '3' : ['2', '4'],
+  '7' : ['8'],
+  '2' : [],
+  '4' : ['8'],
+  '8' : []
 }
-
-serv_addr.sin_family = AF_INET;
-serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
-serv_addr.sin_port = htons(3131);
-
-if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
-{
-  printf("Connection failed\n");
-  exit(0);
-}
-printf("Enter the message:\n");
-scanf("%s",a);
-write(sockfd,a,50);
-read(sockfd,a1,50);
-printf("Client Received the message %s",a1);
-close(sockfd);
-}
+visited = [] 
+def dfs(visited, graph, node):  
+    if node not in visited:
+        print (node)
+        visited.append(node)
+        for neighbour in graph[node]:
+            dfs(visited, graph, neighbour)
+print("Following is the Depth-First Search")
+dfs(visited, graph, '5')
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox2'))">Copy</button>
     <br>
@@ -103,38 +66,81 @@ close(sockfd);
 
   <!------------------------------------------------------ -->
   <div>
-        <P><<h2>iterative server connection less</h2>
+        <P><<h2> greedy BFS</h2>
   <textarea id="textbox3" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<netinet/in.h>
-int main()
-{
-  int sockfd,newsockfd,clilen;
-  struct sockaddr_in serv_addr,cli_addr;
-  char msg[50];
-  sockfd=socket(AF_INET,SOCK_DGRAM,0);
-  if(sockfd<0)
-  {
-    printf("\n Socket Failed");
-    exit(0);
-  }
-  serv_addr.sin_family=AF_INET;
-  serv_addr.sin_addr.s_addr=htonl(INADDR_ANY);
-  serv_addr.sin_port=htons(3100);
-  if(bind(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
-  {
-    printf("\n Bind Failed");
-    exit(0);
-  }
-  clilen=sizeof(cli_addr);
-  recvfrom(sockfd,msg,80,0,(struct sockaddr *)&cli_addr,&clilen);
-  printf("Server Received: %s",msg);
-  sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
-  close(sockfd);
-  
-}
+SuccList ={'A':[['B',3],['C',2]], 
+           'B':[['A',5],['C',2],['D',2],['E',3]], 
+           'C':[['A',5],['B',3],['F',2],['G',4]], 
+           'D':[['H',1],['I',99]],
+           'F': [['J',99]],
+           'G':[['K',99],['L',3]]}
+Start='A'
+Goal='E'
+Closed = list()
+SUCCESS=True
+FAILURE=False
+State=FAILURE
+
+
+def MOVEGEN(N):
+	New_list=list()
+	if N in SuccList.keys():
+		New_list=SuccList[N]
+	
+	return New_list
+	
+def GOALTEST(N):
+	if N == Goal:
+		return True
+	else:
+		return False
+
+
+def APPEND(L1,L2):
+	New_list=list(L1)+list(L2)
+	return New_list
+	
+def SORT(L):
+	L.sort(key = lambda x: x[1]) 
+	return L 
+	
+def BestFirstSearch():
+	OPEN=[[Start,5]]
+	CLOSED=list()
+	global State
+	global Closed
+	while (len(OPEN) != 0) and (State != SUCCESS):
+		print("------------")
+		N= OPEN[0]
+		print("N=",N)
+		del OPEN[0] #delete the node we picked
+		
+		if GOALTEST(N[0])==True:
+			State = SUCCESS
+			CLOSED = APPEND(CLOSED,[N])
+			print("CLOSED=",CLOSED)
+		else:
+			CLOSED = APPEND(CLOSED,[N])
+			print("CLOSED=",CLOSED)
+			CHILD = MOVEGEN(N[0])
+			print("CHILD=",CHILD)
+			for val in CLOSED:
+				if val in CHILD:
+					CHILD.remove(val)
+			for val in OPEN:
+				if val in CHILD:
+					CHILD.remove(val)
+			OPEN = APPEND(CHILD,OPEN) #append movegen elements to OPEN
+			print("Unsorted OPEN=",OPEN)
+			SORT(OPEN)
+			print("Sorted OPEN=",OPEN)
+			
+	Closed=CLOSED
+	return State
+	
+#Driver Code
+result=BestFirstSearch() #call search algorithm
+print(Closed,result)
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox3'))">Copy</button>
     <br>
@@ -142,55 +148,72 @@ int main()
 
 <!------------------------------------------------------ -->
   <div>
-        <P><<h2>iterative client connection less</h2>
+        <P><<h2>A star</h2>
   <textarea id="textbox4" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<netinet/in.h>
-#include<string.h>
-#include<sys/socket.h>
-int main()
-{
-        int sockfd,n,clilen,servlen;
-        struct sockaddr_in cli_addr,serv_addr;
-        char msg[50],msg1[50];
-        sockfd=socket(AF_INET,SOCK_DGRAM,0);
-        if(sockfd<0)
-        {
-         printf("\n Sokcet Failed");
-         exit(0);
-       }
-        serv_addr.sin_family=AF_INET;
-        serv_addr.sin_addr.s_addr=inet_addr("192.168.200.93");
-        serv_addr.sin_port=htons(3100);
-        cli_addr.sin_family=AF_INET;
-        cli_addr.sin_addr.s_addr=htonl(INADDR_ANY);
-        cli_addr.sin_port=htons(0);
-      if(connect(sockfd,(struct sockaddr*)&cli_addr,sizeof(cli_addr))<0)
-       {
-        printf("Client cant’t bind");
-        exit(1);
-       }
-       printf("Enter String");
-       fgets(msg,50,stdin);
-        if(sendto(sockfd,msg,50,0,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
-        {
-          printf("Client send to error");
-          exit(0);
-        }
-        servlen=sizeof(serv_addr);
-        n=recvfrom(sockfd,msg1,50,0,(struct sockaddr *)&serv_addr,&servlen);
-        if(n<0)
-        {
-                printf("Recv error");
-                exit(1);
-        }
-        else
-        {
-                printf("\n  Client received msg : %s",msg1);
-        }
-        close(sockfd);
-}
+from queue import heappop,heappush
+from math import inf
+class Graph:
+    def __init__(self,directed=True):
+        self.edges={}
+        self.huristics={}
+        self.directed=directed
+    def add_edge(self,node1,node2,cost=1,__reversed=False):
+        try:neighbors=self.edges[node1]
+        except KeyError:neighbors={}
+        neighbors[node2]=cost
+        self.edges[node1]=neighbors
+        if not self.directed and not __reversed:self.add_edge(node2,node1,cost,True)
+    def set_huristics(self,huristics={}):
+        self.huristics=huristics
+    def neighbors(self,node):
+        try:return self.edges[node]
+        except KeyError:return[]
+    def cost(self,node1,node2):
+        try:return self.edges[node1][node2]
+        except:return inf
+    def a_star_search(self,start,goal):
+        found,fringe,visited,came_from,cost_so_far=False,[(self.huristics[start],start)],set([start]),{start:None},{start:0}
+        print('{:11s}|{}'.format('Expand Node','Fringe'))
+        print('---------------')
+        print('{:11s}|{}'.format('-',str(fringe[0])))
+        while not found and len(fringe):
+            _,current=heappop(fringe)
+            print('{:11s}'.format(current),end='|')
+            if current==goal:found=True;break
+            for node in self.neighbors(current):
+                new_cost=cost_so_far[current]+self.cost(current,node)
+                if node not in visited or cost_so_far[node]>new_cost:
+                    visited.add(node);came_from[node]=current;cost_so_far[node]=new_cost
+                    heappush(fringe,(new_cost+self.huristics[node],node))
+            print(','.join([str(n) for n in fringe]))
+        if found:print();return came_from,cost_so_far[goal]
+        else:print('No path from {} to {}'.format(start,goal));return None,inf
+    @staticmethod
+    def print_path(came_from,goal):
+        parent=came_from[goal]
+        if parent:
+            Graph.print_path(came_from,parent)
+        else:print(goal,end='');return
+        print('=>',goal,end='')
+    def __str__(self):
+        return str(self.edges)
+graph=Graph(directed=True)
+graph.add_edge('A','B',4)
+graph.add_edge('A','C',1)
+graph.add_edge('B','D',3)
+graph.add_edge('B','E',8)
+graph.add_edge('C','C',0)
+graph.add_edge('C','D',7)
+graph.add_edge('C','F',6)
+graph.add_edge('D','C',2)
+graph.add_edge('D','E',4)
+graph.add_edge('E','G',2)
+graph.add_edge('F','G',8)
+graph.set_huristics({'A':8,'B':8,'C':6,'D':5,'E':1,'F':4,'G':0})
+start,goal='A','G'
+traced_path,cost=graph.a_star_search(start,goal)
+if(traced_path):print('Path:',end='');Graph.print_path(traced_path,goal);
+print('\nCost:',cost)
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox4'))">Copy</button>
     <br>
@@ -198,62 +221,34 @@ int main()
 	
  <!------------------------------------------------------ -->
   <div>
-        <P><<h2>concurrent server connection oriented</h2>
+        <P><<h2>decision tree</h2>
   <textarea id="textbox5" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<netinet/in.h>
- 
-int main()
-{
-  int sockfd,newsockfd,newsockfd1,clilen,pid,pid1;
-  struct sockaddr_in serv_addr,cli_addr;
-  char msg[50];
-  int count = 80;
-  sockfd = socket(AF_INET,SOCK_STREAM,0);
-  if(sockfd < 0)
-  {
-    printf("Socket failed\n");
-    exit(0);
-  }
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serv_addr.sin_port = htons(3100);
-  if(bind(sockfd,(struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0 )
-  {
-    printf("Bind failed\n");
-    exit(1);
-  }
-  if(listen(sockfd,5) < 0)
-  {
-    printf("Listen failed\n");
-    exit(1);
-  }
-  clilen = sizeof(cli_addr);
-  newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-  pid = fork();
-  if( pid == 0)
-  {
-    close(sockfd);
-    printf("pid : %d Server ready\n",pid);
-    read(newsockfd,msg,50);
-    printf("Server received: %s\n",msg);
-    write(newsockfd,msg,50);
-  }
-  close(newsockfd);
-  newsockfd1 = accept(sockfd,(struct sockaddr*)&cli_addr, &clilen);
-  pid1 = fork();
-  if(pid1 == 0)
-  {
-    close(sockfd);
-    printf("pid1 : %d Server ready\n",pid1);
-    read(newsockfd1,msg,50);
-    printf("Server received : %s\n",msg);
-    write(newsockfd1,msg,50);
-  }
-  close(newsockfd1);
-} 
+import sys
+import matplotlib
+#matplotlib.use('Agg')
+import pandas
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
+import matplotlib.pyplot as plt
+
+import os
+os.chdir("C:\\Users\\admin-15\\Desktop")
+
+df=pandas.read_csv("data.csv")
+d={'UK':0,'USA':1,'N':2}
+df['Nationality']=df['Nationality'].map(d)
+d={'YES':1,'NO':0}
+df['Go']=df['Go'].map(d)
+features=['Age','Experience','Rank','Nationality']
+X=df[features]
+y=df['Go']
+dtree=DecisionTreeClassifier()
+dtree=dtree.fit(X,y)
+tree.plot_tree(dtree,feature_names=features)
+plt.show()
+
+#plt.savefig(sys.stdout.buffer)
+#sys.stdout.flush() 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox5'))">Copy</button>
     <br>
@@ -261,42 +256,47 @@ int main()
 	
 <!------------------------------------------------------ -->
   <div>
-        <P><<h2>concurrent client connection oriented</h2>
+        <P><<h2>MLFFN</h2>
   <textarea id="textbox6" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<netinet/in.h>
+import numpy as np
 
-int main()
-{
-  int sockfd;
-  struct sockaddr_in serv_addr;
-  char msg[50],msg1[50];
-  sockfd = socket(AF_INET,SOCK_STREAM,0);
-  if(sockfd < 0)
-  {
-    printf("Socket failed\n");
-    exit(0);
-  }
-  
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = inet_addr("192.168.200.93");
-  serv_addr.sin_port = htons(3100);
-   
-  if(connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-  {
-    printf("Connect failed\n");
-    exit(1);
-  }
-  
-  printf("Enter message\n");
-  scanf("%s",msg);
-  write(sockfd,msg,50);
-  read(sockfd,msg1,50);
-  printf("Client received : %s\n",msg1);
-  close(sockfd);
-} 
+class NeuralNetwork():
+    def __init__(self):
+        np.random.seed(1)
+        self.synaptic_weights = 2*np.random.random((3,1))-1
+    def sigmoid(self,x):
+        return 1/(1+np.exp(-x))
+    def sigmoid_derivative(self,x):
+        return x*(1-x)
+    def train(self,training_input,training_output,training_iterations):
+        for iteration in range(training_iterations):
+            output = self.think(training_inputs)
+            error = training_output-output
+            adjustment = np.dot(training_input.T,error*self.sigmoid_derivative(output))
+            self.synaptic_weights += adjustment
+    def think(self,inputs):
+        inputs = inputs.astype(float)
+        output = self.sigmoid(np.dot(inputs,self.synaptic_weights))
+        return output
+if __name__=="__main__":
+        neural_network = NeuralNetwork()
+        print("Beginning Randomly Generated Weights:")
+        print(neural_network.synaptic_weights)
+        training_inputs = np.array([[0,0,1],
+                                    [1,1,1],
+                                    [1,0,1],
+                                    [0,1,1]])
+        training_outputs = np.array([[0,1,1,0]]).T
+        neural_network.train(training_inputs,training_outputs,15000)
+        print("Ending Weights After Training:")
+        print(neural_network.synaptic_weights)
+        user_input_one = str(input("User Input One:"))
+        user_input_two = str(input("User Input Two:"))
+        user_input_three = str(input("User Input Three:"))
+        print("Considering New Situation:",([user_input_one, user_input_two,user_input_three]))
+        print("New Output data:")
+        print(neural_network.think(np.array([user_input_one, user_input_two,user_input_three])))
+        print("Wow,we did it!") 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox6'))">Copy</button>
     <br>
@@ -304,62 +304,20 @@ int main()
 	
   <!------------------------------------------------------ -->
   <div>
-        <P><<h2>concurrent server connection less</h2>
+        <P><<h2>remove stopwords</h2>
   <textarea id="textbox7" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-
-int main()
-{
-  int sockfd,newsockfd,clilen,pid,pid1,n,n1;
-  struct sockaddr_in serv_addr,cli_addr;
-  char msg[50];
-  int count = 80;
-  sockfd = socket(AF_INET,SOCK_DGRAM,0);
-  if(sockfd < 0)
-  {
-  printf("Socket failed\n");
-  exit(1);
-  }
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serv_addr.sin_port = htons(3204);
-  if(bind(sockfd,(struct sockaddr *) &serv_addr, sizeof(serv_addr))<0)
-  {
-    printf("bind failed\n");
-    exit(1);
-  }
-  clilen = sizeof(cli_addr);
-  n = recvfrom(sockfd,msg,80,0,(struct sockaddr *) &cli_addr, &clilen);
-  if(n<0)
-  {
-    printf("Frist client recv error\n");
-    exit(1);
-  }
-  pid = fork();
-  if(pid == 0)
-  {
-    printf("Server ready\n");
-    printf("server received the message: %s\n",msg);
-    sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
-  }
-  n1 = recvfrom(sockfd,msg,80,0,(struct sockaddr *)&cli_addr,&clilen);
-  if(n1<0)
-  {
-    printf("second client recv error\n");
-    exit(1);
-  }
-  pid1 = fork();
-  if(pid1 == 0)
-  {
-    printf("Server ready\n");
-    printf("server received the message: %s\n",msg);
-    sendto(sockfd,msg,80,0,(struct sockaddr *) &cli_addr,clilen);
-  }
-  close(sockfd);
-} 
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+text="How to remove stop words with NLTK library in Python"
+print("Text:",text)
+tokens=word_tokenize(text.lower())
+print("Tokens:",tokens)
+english_stopwords=stopwords.words('english')
+tokens_wo_stopwords=[t for t in tokens if t not in english_stopwords]
+print("Text without stop words:","".join(tokens_wo_stopwords)) 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox7'))">Copy</button>
     <br>
@@ -367,55 +325,15 @@ int main()
 	
   <!------------------------------------------------------ -->
   <div>
-        <P><<h2>concurrent client connection less</h2>
-        <textarea id="textbox8" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<netinet/in.h>
-#include<string.h>
-int main()
-{
-   int sockfd,n,clilen,servlen;
-   struct sockaddr_in serv_addr,cli_addr;
-   char msg[50],msg1[50];
-   sockfd=socket(AF_INET,SOCK_DGRAM,0);
-   if(sockfd<0)
-   {
-      printf("\n Socket Failed");
-      exit(0);
-   }
-   serv_addr.sin_family=AF_INET;
-   serv_addr.sin_addr.s_addr=inet_addr("192.168.200.93");
-   serv_addr.sin_port=htons(3204);
-   cli_addr.sin_family=AF_INET;
-   cli_addr.sin_addr.s_addr=htonl(INADDR_ANY);
-   cli_addr.sin_port=htons(3000);
-   if(bind(sockfd,(struct sockaddr *)&cli_addr,sizeof(cli_addr))<0)
-   {
-      printf("\n Bind Failed");
-      exit(1);
-   }
-   printf("Enter String:");
-   fgets(msg,50,stdin);
-   if(sendto(sockfd,msg,80,0,(struct sockaddr*)&serv_addr,sizeof(serv_addr))< 0)
-   {
-      printf("Client send to error");
-      exit(0);
-   }
-   servlen=sizeof(serv_addr);
-   n=recvfrom(sockfd,msg1,80,0,(struct sockaddr *)&serv_addr,&servlen);
-   if(n<0)
-   {
-       printf(" Recieve error");
-       exit(1);
-   }
-   else
-   {
-       printf("Client received msg:%s",msg1);    
-   }
-   close(sockfd);
-} 
+        <P><<h2>stemming words from sentences</h2>
+  <textarea id="textbox8" rows="25" cols="100">
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+ps=PorterStemmer()
+sentence="Programmers program with programming languages"
+words=word_tokenize(sentence)
+for w in words:
+    print(w,":",ps.stem(w)) 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox8'))">Copy</button>
     <br>
@@ -423,51 +341,27 @@ int main()
 	
     <!------------------------------------------------------ -->
   <div>
-        <P><<h2>time server</h2>
+        <P><<h2>Parts of Speech tagging</h2>
   <textarea id="textbox9" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<string.h>
-#include<time.h>
-int main()
-{
-  int sockfd,newsockfd,clilen;
-  struct sockaddr_in serv_addr,cli_addr;
-  char str[100],a[50];
-  time_t tick;
-  sockfd=socket(AF_INET,SOCK_STREAM,0);
-  if(sockfd<0)
-  {
-    printf("socket failed");
-    exit(0);
-  }
-  serv_addr.sin_family=AF_INET;
-  serv_addr.sin_addr.s_addr=inet_addr("192.168.200.155");
-  serv_addr.sin_port=htons(3100);
-  if(bind(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
-  {
-    printf("Bind failed");
-    exit(0);
-  }
-  if(listen(sockfd,5)<0)
-  {
-    printf("\n listen failed");
-    exit(0);
-  }
-  clilen=sizeof(cli_addr);
-  newsockfd=accept(sockfd,(struct sockaddr *)&cli_addr,&clilen);
-  tick=time(NULL);
-  snprintf(str,sizeof(str),"%s\n",ctime(&tick));
-  printf("%s",str);
-  read(newsockfd,a,50);
-  printf("\n%s",a);
-  write(newsockfd,str,100);
-  close(newsockfd);
-} 
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize,sent_tokenize
+stop_words=set(stopwords.words('english'))
+
+txt="Sukanya,Rajib and Naba are my good friends."\
+    "Sukanya is getting married next year."\
+    "Marriage is a big step in one's life."\
+    "It is both exciting and frightening."\
+    "But friendship is a sacrwed bond between people."\
+    "It is a special kind of love between us."\
+    "Many of you must have tried searching for a friend"\
+    "But never found the right one."
+tokenized=sent_tokenize(txt)
+for i in tokenized:
+    wordsList=nltk.word_tokenize(i)
+    wordList=[w for w in wordsList if not w in stop_words]
+    tagged=nltk.pos_tag(wordsList)
+    print(tagged) 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox9'))">Copy</button>
     <br>
@@ -475,40 +369,13 @@ int main()
 	
   <!------------------------------------------------------ -->
   <div>
-        <P><<h2>time client</h2>
+        <P><<h2>lemmatization</h2>
   <textarea id="textbox10" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<stdlib.h>
-#include<string.h>
-#include<time.h>
-int main()
-{
-  int sockfd;
-  struct sockaddr_in serv_addr;
-  char a[50],a1[50];
-  ockfd=socket(AF_INET,SOCK_STREAM,0);
-  if(sockfd<0)
-  {
-    printf("socket failed");
-    exit(0);
-  }
-  serv_addr.sin_family=AF_INET;
-  serv_addr.sin_addr.s_addr=inet_addr("192.168.200.155");
-  serv_addr.sin_port=htons(3100);
-  if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0)
-  {
-    printf("connection failed");
-    exit(0);
-  }
-  write(sockfd,"Hello",50);
-  sleep(2);
-  read(sockfd,a,50);
-  printf("Client received message %s",a);
-  close(sockfd);
-} 
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+print("rocks :", lemmatizer.lemmatize("rocks"))
+print("corpora :", lemmatizer.lemmatize("corpora"))
+print("better :", lemmatizer.lemmatize("better", pos ="a") 
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox10'))">Copy</button>
     <br>
@@ -516,28 +383,29 @@ int main()
 	
    <!------------------------------------------------------ -->
   <div>
-        <P><<h2>Dns</h2>
+        <P><<h2>family tree prolog</h2>
   <textarea id="textbox11" rows="25" cols="100">
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<netdb.h>
-#include<arpa/inet.h>
-int main()
-{
-  struct hostent *hst;
-  char name[20];
-  printf("Enter host name");
-  scanf("%s",name);
-  hst=gethostbyname(name);
-  if(hst==NULL)
-  {
-    printf("host not found");
-  }
-  printf("host name is :%s\n",hst->h_name);
-  printf("IP address is :%s\n",inet_ntoa(*((struct in_addr *) hst->h_addr)));
-}
+father(jack,susan).
+father(jack,ray).
+father(david,liza).
+father(david,john).
+father(john,peter).
+father(john,mary).
+mother(karen,susan).
+mother(amy,liza).
+mother(amy,john).
+mother(susan,peter).
+mother(susan,mary).
+
+parent(X,Y):-father(X,Y).
+parent(X,Y):-mother(X,Y).
+grandfather(X,Y):-father(X,Z),parent(Z,Y).
+grandmother(X,Y):-mother(X,Z),parent(Z,Y).
+grandparent(X,Y):-parent(X,Z),parent(Z,Y).
+yeye(X,Y):-father(X,Z),father(Z,Y).
+mama(X,Y):-mother(X,Z),father(Z,Y).
+gunggung(X,Y):-father(X,Z),mother(Z,Y).
+popo(X,Y):-mother(X,Z),mother(Z,Y).
   </textarea>
   <button onclick="copyToClipboard(document.getElementById('textbox11'))">Copy</button>
     <br>
